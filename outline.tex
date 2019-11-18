@@ -1,0 +1,68 @@
+% !TEX program=lualatex
+\RequirePackage{luatex85}
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[style=nature, citestyle=authoryear]{biblatex}
+\usepackage{tikz}
+\usepackage{wrapfig}
+\usepackage{lineno}
+\usepackage{outline}
+\bibliography{citations.bib}
+
+\begin{document}
+\linenumbers
+\begin{outline}
+	\item Introduction
+	\begin{outline}
+		\item What are quality scores and why are they important?
+		\item What is Base Quality Score Recalibration?
+		\item How much does BQSR help?
+		\begin{outline}
+			\item BQSR is recommended for use in cancer genomics as well, but the cancer genome is likely much different than the human genome and the database of variable sites will likely miss many sites.
+			\begin{outline}
+				\item Cite some stats for this
+			\end{outline}
+		\end{outline}
+		\item BQSR is probably most helpful with low or inconsistent coverage, as one may expect when sequencing a non-model organism; however, by definition that means you lack a quality reference and database of variable sites required for BQSR.
+			\begin{outline}
+				\item Find some estimates of differences between reference and samples sequenced; perhaps look at mouse
+				\item This will be highly species-dependent and situation specific
+			\end{outline}
+		\item \texttt{kbbq} is a method to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites.
+	\end{outline}
+	\item Methods
+	\begin{outline}
+		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
+		\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
+		\item Simulate both false positives and negatives and summarize degree of miscalibration.
+		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
+		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
+		\item kbbq description
+		\item appliction
+	\end{outline}
+	\item Results
+	\begin{outline}
+		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
+		\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
+		\item Simulate both false positives and negatives and summarize degree of miscalibration.
+		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
+		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
+		\item appliction
+	\end{outline}
+	\item Discussion
+	\begin{outline}
+		\item BQSR can cause miscalibration worse than using raw data in some situations
+		\item BQSR is useful in some scenarios
+		\item \texttt{kbbq} is resilient to misspecified references and missing databases of variable sites, since it doesn't use those as input.
+		\item Compare simulated scenarios to non-model and cancer scenarios.
+		\begin{outline}
+			\item In situations where the sample may not closely match the reference, use \texttt{kbbq} or don't recalibrate.
+		\end{outline}
+	\end{outline}
+\end{outline}
+\end{document}
