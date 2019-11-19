@@ -19,21 +19,35 @@
 \begin{outline}
 	\item Introduction
 	\begin{outline}
-		\item What are quality scores and why are they important?
+		\item What are quality scores and why are they important? \parencite{ewing_base-calling_1998} \parencite{ewing_base-calling_1998-1}
+		\begin{outline}
+			\item $-10\log_{10}P(e)$ \parencite{ewing_base-calling_1998} \parencite{ewing_base-calling_1998-1}
+			\item Variant calling models use quality scores to weight the observed data. Generally, these models attempt to find the sample genotype most consistent with the observed data and recognize that low quality bases provide little evidence for one genotype over another. The BCFTools multiallelic caller \parencite{li_sequence_2009}, GATK's HaplotypeCaller \parencite{poplin_scaling_2018}, and FreeBayes \parencite{garrison_haplotype-based_2012} all take quality score into consideration when calling variants.
+		\end{outline}
 		\item What is Base Quality Score Recalibration?
+		\begin{outline}
+			\item Base quality scores have an exact definition in terms of probability. They can be interpreted as a prediction giving the probability the reported base is an error. In general, probabilities are called \textit{calibrated} if the reported probability accurately predicts the frequency of an event.
+			\item Base quality scores in Illumina sequencing reads are not well-calibrated. (TODO: CITE)
+		\end{outline}
 		\item How much does BQSR help?
 		\begin{outline}
-			\item BQSR is recommended for use in cancer genomics as well, but the cancer genome is likely much different than the human genome and the database of variable sites will likely miss many sites.
-			\begin{outline}
-				\item Cite some stats for this
-			\end{outline}
+			\item BQSR is recommended in GATK's Best Practices, but its affect on the resulting variant calls is not well-supported. (possibly cite \cite{ni_improvement_2016} here)
+			\item BQSR is recommended for use in cancer genomics as well, but the cancer genome is likely much different than the human genome and the database of variable sites will likely miss many sites. (TODO: find some citations)
 		\end{outline}
 		\item BQSR is probably most helpful with low or inconsistent coverage, as one may expect when sequencing a non-model organism; however, by definition that means you lack a quality reference and database of variable sites required for BQSR.
 			\begin{outline}
 				\item Find some estimates of differences between reference and samples sequenced; perhaps look at mouse
 				\item This will be highly species-dependent and situation specific
 			\end{outline}
-		\item \texttt{kbbq} is a method to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites.
+		\item Alternative Approaches
+			\begin{outline}
+			\item Alternative approaches have been developed to avoid providing a database of variable sites. However, these approaches still require a reference and alignment.
+			\item Lacer \parencite{chung_lacer:_2017} bins aligned bases based on depth and whether the base matches the reference, then uses singular value decomposition to infer the shift in quality score for each base.
+			\item ReQON \parencite{cabanski_reqon:_2012}, like GATK, considers bases that do not match the reference as errors but limits the number of acceptable errors at a position to minimize the effect of unknown variants. It then uses a logistic regression to recalibrate the quality scores.
+			\item SOAP2 \parencite{li_soap2:_2009} is an aligner that performs BQSR during alignment (TODO: more detail)
+			\item Alternative approaches use synthetic spike-ins of known composition and GATK's method \parencite{zook_synthetic_2012} or piecewise regression \parencite{ni_improvement_2016} to recalibrate quality scores. Since the sequence of the spike-in is known before hand, errors are easy to identify as there should be no variation in the spiked-in sample.
+			\end{outline}
+		\item Here we present \texttt{kbbq}, a method to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites.
 	\end{outline}
 	\item Methods
 	\begin{outline}

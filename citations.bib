@@ -1,0 +1,189 @@
+
+@article{chung_lacer:_2017,
+	title = {Lacer: accurate base quality score recalibration for improving variant calling from next-generation sequencing data in any organism},
+	rights = {© 2017, Posted by Cold Spring Harbor Laboratory. This pre-print is available under a Creative Commons License (Attribution-{NonCommercial}-{NoDerivs} 4.0 International), {CC} {BY}-{NC}-{ND} 4.0, as described at http://creativecommons.org/licenses/by-nc-nd/4.0/},
+	url = {https://www.biorxiv.org/content/10.1101/130732v2},
+	doi = {10.1101/130732},
+	shorttitle = {Lacer},
+	abstract = {{\textless}h3{\textgreater}Abstract{\textless}/h3{\textgreater} {\textless}p{\textgreater}Next-generation sequencing data is accompanied by quality scores that quantify sequencing error. Inaccuracies in these quality scores propagate through all subsequent analyses; thus base quality score recalibration is a standard step in many next-generation sequencing workflows, resulting in improved variant calls. Current base quality score recalibration algorithms rely on the assumption that sequencing errors are already known; for human resequencing data, relatively complete variant databases facilitate this. However, because existing databases are still incomplete, recalibration is still inaccurate; and most organisms do not have variant databases, exacerbating inaccuracy for non-human data. To overcome these logical and practical problems, we introduce Lacer, which recalibrates base quality scores without assuming knowledge of correct and incorrect bases and without requiring knowledge of common variants. Lacer is the first logically sound, fully general, and truly accurate base recalibrator. Lacer enhances variant identification accuracy for resequencing data of human as well as other organisms (which are not accessible to current recalibrators), simultaneously improving and extending the benefits of base quality score recalibration to nearly all ongoing sequencing projects. Lacer is available at: https://github.com/swainechen/lacer.{\textless}/p{\textgreater}},
+	pages = {130732},
+	journaltitle = {{bioRxiv}},
+	author = {Chung, Jade C. S. and Chen, Swaine L.},
+	urldate = {2019-11-18},
+	date = {2017-04-27},
+	langid = {english},
+	file = {Full Text PDF:/home/adam/Zotero/storage/2W88T398/Chung and Chen - 2017 - Lacer accurate base quality score recalibration f.pdf:application/pdf;Snapshot:/home/adam/Zotero/storage/AJPQIFQS/130732v2.html:text/html}
+}
+
+@article{cabanski_reqon:_2012,
+	title = {{ReQON}: a Bioconductor package for recalibrating quality scores from next-generation sequencing data},
+	volume = {13},
+	issn = {1471-2105},
+	doi = {10.1186/1471-2105-13-221},
+	shorttitle = {{ReQON}},
+	abstract = {{BACKGROUND}: Next-generation sequencing technologies have become important tools for genome-wide studies. However, the quality scores that are assigned to each base have been shown to be inaccurate. If the quality scores are used in downstream analyses, these inaccuracies can have a significant impact on the results.
+{RESULTS}: Here we present {ReQON}, a tool that recalibrates the base quality scores from an input {BAM} file of aligned sequencing data using logistic regression. {ReQON} also generates diagnostic plots showing the effectiveness of the recalibration. We show that {ReQON} produces quality scores that are both more accurate, in the sense that they more closely correspond to the probability of a sequencing error, and do a better job of discriminating between sequencing errors and non-errors than the original quality scores. We also compare {ReQON} to other available recalibration tools and show that {ReQON} is less biased and performs favorably in terms of quality score accuracy.
+{CONCLUSION}: {ReQON} is an open source software package, written in R and available through Bioconductor, for recalibrating base quality scores for next-generation sequencing data. {ReQON} produces a new {BAM} file with more accurate quality scores, which can improve the results of downstream analysis, and produces several diagnostic plots showing the effectiveness of the recalibration.},
+	pages = {221},
+	journaltitle = {{BMC} bioinformatics},
+	shortjournal = {{BMC} Bioinformatics},
+	author = {Cabanski, Christopher R. and Cavin, Keary and Bizon, Chris and Wilkerson, Matthew D. and Parker, Joel S. and Wilhelmsen, Kirk C. and Perou, Charles M. and Marron, J. S. and Hayes, D. Neil},
+	date = {2012-09-04},
+	pmid = {22946927},
+	pmcid = {PMC3447716},
+	keywords = {Calibration, Genome, High-Throughput Nucleotide Sequencing, Logistic Models, Sequence Alignment, Software},
+	file = {Full Text:/home/adam/Zotero/storage/B2UBKQBE/Cabanski et al. - 2012 - ReQON a Bioconductor package for recalibrating qu.pdf:application/pdf}
+}
+
+@article{ewing_base-calling_1998,
+	title = {Base-Calling of Automated Sequencer Traces Using Phred. {II}. Error Probabilities},
+	volume = {8},
+	issn = {1088-9051, 1549-5469},
+	url = {http://genome.cshlp.org/content/8/3/186},
+	doi = {10.1101/gr.8.3.186},
+	abstract = {Elimination of the data processing bottleneck in high-throughput sequencing will require both improved accuracy of data processing software and reliable measures of that accuracy. We have developed and implemented in our base-calling program phred the ability to estimate a probability of error for each base-call, as a function of certain parameters computed from the trace data. These error probabilities are shown here to be valid (correspond to actual error rates) and to have high power to discriminate correct base-calls from incorrect ones, for read data collected under several different chemistries and electrophoretic conditions. They play a critical role in our assembly program phrap and our finishing programconsed.},
+	pages = {186--194},
+	number = {3},
+	journaltitle = {Genome Research},
+	shortjournal = {Genome Res.},
+	author = {Ewing, Brent and Green, Phil},
+	urldate = {2019-11-18},
+	date = {1998-03-01},
+	langid = {english},
+	pmid = {9521922},
+	file = {Full Text PDF:/home/adam/Zotero/storage/NSU3E4AP/Ewing and Green - 1998 - Base-Calling of Automated Sequencer Traces Using P.pdf:application/pdf;Snapshot:/home/adam/Zotero/storage/8M8GE96V/186.html:text/html}
+}
+
+@article{cock_sanger_2010,
+	title = {The Sanger {FASTQ} file format for sequences with quality scores, and the Solexa/Illumina {FASTQ} variants},
+	volume = {38},
+	issn = {1362-4962},
+	doi = {10.1093/nar/gkp1137},
+	abstract = {{FASTQ} has emerged as a common file format for sharing sequencing read data combining both the sequence and an associated per base quality score, despite lacking any formal definition to date, and existing in at least three incompatible variants. This article defines the {FASTQ} format, covering the original Sanger standard, the Solexa/Illumina variants and conversion between them, based on publicly available information such as the {MAQ} documentation and conventions recently agreed by the Open Bioinformatics Foundation projects Biopython, {BioPerl}, {BioRuby}, {BioJava} and {EMBOSS}. Being an open access publication, it is hoped that this description, with the example files provided as Supplementary Data, will serve in future as a reference for this important file format.},
+	pages = {1767--1771},
+	number = {6},
+	journaltitle = {Nucleic Acids Research},
+	shortjournal = {Nucleic Acids Res.},
+	author = {Cock, Peter J. A. and Fields, Christopher J. and Goto, Naohisa and Heuer, Michael L. and Rice, Peter M.},
+	date = {2010-04},
+	pmid = {20015970},
+	pmcid = {PMC2847217},
+	keywords = {Computational Biology, History, 20th Century, History, 21st Century, Sequence Analysis, {DNA}, Software},
+	file = {Full Text:/home/adam/Zotero/storage/B67JVDRF/Cock et al. - 2010 - The Sanger FASTQ file format for sequences with qu.pdf:application/pdf}
+}
+
+@article{ewing_base-calling_1998-1,
+	title = {Base-calling of automated sequencer traces using phred. I. Accuracy assessment},
+	volume = {8},
+	issn = {1088-9051},
+	doi = {10.1101/gr.8.3.175},
+	abstract = {The availability of massive amounts of {DNA} sequence information has begun to revolutionize the practice of biology. As a result, current large-scale sequencing output, while impressive, is not adequate to keep pace with growing demand and, in particular, is far short of what will be required to obtain the 3-billion-base human genome sequence by the target date of 2005. To reach this goal, improved automation will be essential, and it is particularly important that human involvement in sequence data processing be significantly reduced or eliminated. Progress in this respect will require both improved accuracy of the data processing software and reliable accuracy measures to reduce the need for human involvement in error correction and make human review more efficient. Here, we describe one step toward that goal: a base-calling program for automated sequencer traces, phred, with improved accuracy. phred appears to be the first base-calling program to achieve a lower error rate than the {ABI} software, averaging 40\%-50\% fewer errors in the data sets examined independent of position in read, machine running conditions, or sequencing chemistry.},
+	pages = {175--185},
+	number = {3},
+	journaltitle = {Genome Research},
+	shortjournal = {Genome Res.},
+	author = {Ewing, B. and Hillier, L. and Wendl, M. C. and Green, P.},
+	date = {1998-03},
+	pmid = {9521921},
+	keywords = {Algorithms, Base Sequence, Human Genome Project, Humans, Reproducibility of Results, Sensitivity and Specificity, Sequence Alignment, Sequence Analysis, {DNA}, Software},
+	file = {Full Text:/home/adam/Zotero/storage/HQZBI2TR/Ewing et al. - 1998 - Base-calling of automated sequencer traces using p.pdf:application/pdf}
+}
+
+@article{li_sequence_2009,
+	title = {The Sequence Alignment/Map format and {SAMtools}},
+	volume = {25},
+	issn = {1367-4811},
+	doi = {10.1093/bioinformatics/btp352},
+	abstract = {{SUMMARY}: The Sequence Alignment/Map ({SAM}) format is a generic alignment format for storing read alignments against reference sequences, supporting short and long reads (up to 128 Mbp) produced by different sequencing platforms. It is flexible in style, compact in size, efficient in random access and is the format in which alignments from the 1000 Genomes Project are released. {SAMtools} implements various utilities for post-processing alignments in the {SAM} format, such as indexing, variant caller and alignment viewer, and thus provides universal tools for processing read alignments.
+{AVAILABILITY}: http://samtools.sourceforge.net.},
+	pages = {2078--2079},
+	number = {16},
+	journaltitle = {Bioinformatics (Oxford, England)},
+	shortjournal = {Bioinformatics},
+	author = {Li, Heng and Handsaker, Bob and Wysoker, Alec and Fennell, Tim and Ruan, Jue and Homer, Nils and Marth, Gabor and Abecasis, Goncalo and Durbin, Richard and {1000 Genome Project Data Processing Subgroup}},
+	date = {2009-08-15},
+	pmid = {19505943},
+	pmcid = {PMC2723002},
+	keywords = {Algorithms, Base Sequence, Computational Biology, Genome, Genomics, Molecular Sequence Data, Sequence Alignment, Sequence Analysis, {DNA}, Software},
+	file = {Full Text:/home/adam/Zotero/storage/WWKDVYVF/Li et al. - 2009 - The Sequence AlignmentMap format and SAMtools.pdf:application/pdf}
+}
+
+@article{poplin_scaling_2018,
+	title = {Scaling accurate genetic variant discovery to tens of thousands of samples},
+	url = {http://biorxiv.org/lookup/doi/10.1101/201178},
+	doi = {10.1101/201178},
+	abstract = {Comprehensive disease gene discovery in both common and rare diseases will require the efficient and accurate detection of all classes of genetic variation across tens to hundreds of thousands of human samples. We describe here a novel assembly-based approach to variant calling, the {GATK} {HaplotypeCaller} ({HC}) and Reference Confidence Model ({RCM}), that determines genotype likelihoods independently per-sample but performs joint calling across all samples within a project simultaneously. We show by calling over 90,000 samples from the Exome Aggregation Consortium ({ExAC}) that, in contrast to other algorithms, the {HC}-{RCM} scales efficiently to very large sample sizes without loss in accuracy; and that the accuracy of indel variant calling is superior in comparison to other algorithms. More importantly, the {HC}-{RCM} produces a fully squared-off matrix of genotypes across all samples at every genomic position being investigated. The {HC}-{RCM} is a novel, scalable, assembly-based algorithm with abundant applications for population genetics and clinical studies.},
+	journaltitle = {{bioRxiv}},
+	author = {Poplin, Ryan and Ruano-Rubio, Valentin and {DePristo}, Mark A. and Fennell, Tim J. and Carneiro, Mauricio O. and Van der Auwera, Geraldine A. and Kling, David E. and Gauthier, Laura D. and Levy-Moonshine, Ami and Roazen, David and Shakir, Khalid and Thibault, Joel and Chandran, Sheila and Whelan, Chris and Lek, Monkol and Gabriel, Stacey and Daly, Mark J and Neale, Ben and {MacArthur}, Daniel G. and Banks, Eric},
+	urldate = {2019-11-18},
+	date = {2018-07-24},
+	file = {Full Text:/home/adam/Zotero/storage/2ICGIKZL/Poplin et al. - 2018 - Scaling accurate genetic variant discovery to tens.pdf:application/pdf}
+}
+
+@article{garrison_haplotype-based_2012,
+	title = {Haplotype-based variant detection from short-read sequencing},
+	url = {http://arxiv.org/abs/1207.3907},
+	abstract = {The direct detection of haplotypes from short-read {DNA} sequencing data requires changes to existing small-variant detection methods. Here, we develop a Bayesian statistical framework which is capable of modeling multiallelic loci in sets of individuals with non-uniform copy number. We then describe our implementation of this framework in a haplotype-based variant detector, {FreeBayes}.},
+	journaltitle = {{arXiv}:1207.3907 [q-bio]},
+	author = {Garrison, Erik and Marth, Gabor},
+	urldate = {2019-11-18},
+	date = {2012-07-20},
+	eprinttype = {arxiv},
+	eprint = {1207.3907},
+	keywords = {Quantitative Biology - Genomics, Quantitative Biology - Quantitative Methods},
+	file = {arXiv Fulltext PDF:/home/adam/Zotero/storage/CDUAKPBH/Garrison and Marth - 2012 - Haplotype-based variant detection from short-read .pdf:application/pdf;arXiv.org Snapshot:/home/adam/Zotero/storage/NMC966H8/1207.html:text/html}
+}
+
+@article{zook_synthetic_2012,
+	title = {Synthetic spike-in standards improve run-specific systematic error analysis for {DNA} and {RNA} sequencing},
+	volume = {7},
+	issn = {1932-6203},
+	doi = {10.1371/journal.pone.0041356},
+	abstract = {While the importance of random sequencing errors decreases at higher {DNA} or {RNA} sequencing depths, systematic sequencing errors ({SSEs}) dominate at high sequencing depths and can be difficult to distinguish from biological variants. These {SSEs} can cause base quality scores to underestimate the probability of error at certain genomic positions, resulting in false positive variant calls, particularly in mixtures such as samples with {RNA} editing, tumors, circulating tumor cells, bacteria, mitochondrial heteroplasmy, or pooled {DNA}. Most algorithms proposed for correction of {SSEs} require a data set used to calculate association of {SSEs} with various features in the reads and sequence context. This data set is typically either from a part of the data set being "recalibrated" (Genome Analysis {ToolKit}, or {GATK}) or from a separate data set with special characteristics ({SysCall}). Here, we combine the advantages of these approaches by adding synthetic {RNA} spike-in standards to human {RNA}, and use {GATK} to recalibrate base quality scores with reads mapped to the spike-in standards. Compared to conventional {GATK} recalibration that uses reads mapped to the genome, spike-ins improve the accuracy of Illumina base quality scores by a mean of 5 Phred-scaled quality score units, and by as much as 13 units at {CpG} sites. In addition, since the spike-in data used for recalibration are independent of the genome being sequenced, our method allows run-specific recalibration even for the many species without a comprehensive and accurate {SNP} database. We also use {GATK} with the spike-in standards to demonstrate that the Illumina {RNA} sequencing runs overestimate quality scores for {AC}, {CC}, {GC}, {GG}, and {TC} dinucleotides, while {SOLiD} has less dinucleotide {SSEs} but more {SSEs} for certain cycles. We conclude that using these {DNA} and {RNA} spike-in standards with {GATK} improves base quality score recalibration.},
+	pages = {e41356},
+	number = {7},
+	journaltitle = {{PloS} One},
+	shortjournal = {{PLoS} {ONE}},
+	author = {Zook, Justin M. and Samarov, Daniel and {McDaniel}, Jennifer and Sen, Shurjo K. and Salit, Marc},
+	date = {2012},
+	pmid = {22859977},
+	pmcid = {PMC3409179},
+	keywords = {Calibration, Cell Line, {DNA}, False Positive Reactions, Humans, Oligonucleotides, Reference Standards, {RNA}, Sequence Analysis, {DNA}, Sequence Analysis, {RNA}},
+	file = {Full Text:/home/adam/Zotero/storage/3MP5A2GL/Zook et al. - 2012 - Synthetic spike-in standards improve run-specific .pdf:application/pdf}
+}
+
+@article{ni_improvement_2016,
+	title = {Improvement in detection of minor alleles in next generation sequencing by base quality recalibration},
+	volume = {17},
+	issn = {1471-2164},
+	doi = {10.1186/s12864-016-2463-2},
+	abstract = {{BACKGROUND}: Minor allele detection in very high coverage sequence data ({\textgreater}1000X) has many applications such as detecting {mtDNA} heteroplasmy, somatic mutations in cancer or tumors, {SNP} calling in pool sequencing, etc., where reads with low frequency are not necessarily sequence error but may instead convey biological information. However, the suitability of common base quality recalibration tools for such applications has not been investigated in detail.
+{RESULTS}: We show that the widely used tool {GATK} {BaseRecalibration} has several limitations in minor allele detection. First, {GATK} {IndelRealignment} fails to work if the sequence coverage is above a certain level since it then becomes computationally infeasible. Second, the accuracy of the base quality largely depends on the database of known {SNPs} as the control, which limits the ability of de novo minor allele detection. Third, {GATK} reduces the base quality of sequence errors at the cost of reducing scores for true minor alleles. To overcome these limitations, we present a novel approach called {SEGREG}, which applies segmented regression to control sequences (e.g. {phiX}174 {DNA}) spiked into a sequencing run. Based on simulations {SEGREG} improves both the accuracy of base quality scores and the detection of minor alleles. We further investigate sequence error and recalibration parameters by applying a Logarithm Likelihood Ratio ({LLR}) approach to {SEGREG} recalibrated base quality scores for {phiX}174 {DNA} sequenced to very high coverage, and for {mtDNA} genome sequences previously analyzed for heteroplasmic variants.
+{CONCLUSIONS}: Our results suggest that {SEGREG} improves base recalibration without suffering the limitations discussed above, and the {LLR} approach benefits from {SEGREG} in identifying more true minor alleles, while avoiding false positives from sequencing error.},
+	pages = {139},
+	journaltitle = {{BMC} genomics},
+	shortjournal = {{BMC} Genomics},
+	author = {Ni, Shengyu and Stoneking, Mark},
+	date = {2016-02-27},
+	pmid = {26920804},
+	pmcid = {PMC4769523},
+	keywords = {Alleles, Calibration, Computer Simulation, {DNA}, Mitochondrial, Gene Frequency, Genome, Mitochondrial, High-Throughput Nucleotide Sequencing, Humans, Likelihood Functions, Polymorphism, Single Nucleotide, Sequence Analysis, {DNA}, Viral Proteins},
+	file = {Full Text:/home/adam/Zotero/storage/B94KF9G3/Ni and Stoneking - 2016 - Improvement in detection of minor alleles in next .pdf:application/pdf}
+}
+
+@article{li_soap2:_2009,
+	title = {{SOAP}2: an improved ultrafast tool for short read alignment},
+	volume = {25},
+	issn = {1367-4803, 1460-2059},
+	url = {https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btp336},
+	doi = {10.1093/bioinformatics/btp336},
+	shorttitle = {{SOAP}2},
+	pages = {1966--1967},
+	number = {15},
+	journaltitle = {Bioinformatics},
+	author = {Li, R. and Yu, C. and Li, Y. and Lam, T.-W. and Yiu, S.-M. and Kristiansen, K. and Wang, J.},
+	urldate = {2019-11-19},
+	date = {2009-08-01},
+	langid = {english},
+	file = {Full Text:/home/adam/Zotero/storage/KFI2KIVS/Li et al. - 2009 - SOAP2 an improved ultrafast tool for short read a.pdf:application/pdf}
+}
