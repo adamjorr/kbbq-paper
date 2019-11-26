@@ -13,6 +13,7 @@
 \usepackage{lineno}
 \usepackage{outline}
 \bibliography{citations.bib}
+\graphicspath{./figures/}
 
 \begin{document}
 \linenumbers
@@ -64,6 +65,10 @@
 	\begin{outline}
 		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
 		\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
+		\begin{figure}[h]
+			\includegraphics[width=5in]{./figures/fnr.pdf}
+			\caption{Base quality score calibration for a range of false negatives in the database of variable sites. The false positive rate is zero. Increasing the false negative rate decreases the quality of the calibration.}
+		\end{figure}	
 		\item Simulate both false positives and negatives and summarize degree of miscalibration.
 		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
 		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
