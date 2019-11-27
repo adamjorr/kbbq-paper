@@ -33,7 +33,10 @@
 		\item How much does BQSR help?
 		\begin{outline}
 			\item BQSR improves quality score calibration in many cases.
-			\item BQSR is recommended in GATK's Best Practices, but its affect on the resulting variant calls is not well-known. (possibly cite \cite{ni_improvement_2016} here)
+			\item BQSR is recommended in GATK's Best Practices, but its affect on the resulting variant calls is not well-characterized.
+			\begin{outline}
+				\item However, \cite{ni_improvement_2016} find that improved quality score calibration aids detection of minor alleles in high coverage datasets by increasing sensitivity and reducing the number of false positive calls.
+			\end{outline}
 			\item BQSR is recommended for use in cancer variant discovery as well \parencite{cibulskis_sensitive_2013}, but the cancer genome is likely much different than the human genome and the database of variable sites will likely miss many sites. (TODO: find some citations)
 		\end{outline}
 		\item BQSR is probably most helpful with low or inconsistent coverage, as one may expect when sequencing a non-model organism; however, by definition that means you lack a quality reference and database of variable sites required for BQSR.
@@ -51,17 +54,7 @@
 			\end{outline}
 		\item Here we present \texttt{kbbq}, a method to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites.
 	\end{outline}
-	\item Methods
-	\begin{outline}
-		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
-		\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
-		\item Simulate both false positives and negatives and summarize degree of miscalibration.
-		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
-		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
-		\item kbbq description
-		\item appliction
-	\end{outline}
-	\item Results
+	\item Methods \& Results
 	\begin{outline}
 		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
 		\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
@@ -72,6 +65,7 @@
 		\item Simulate both false positives and negatives and summarize degree of miscalibration.
 		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
 		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
+		\item kbbq description
 		\item application
 	\end{outline}
 	\item Discussion
