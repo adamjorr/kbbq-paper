@@ -5,12 +5,20 @@ get_data_dir <- function(path){
   return(paste0("../data/", path))
 }
 
-get_benchmark_file <- function(stem){
-  return(paste0(get_data_dir(stem),".benchmark"))
+get_file <- function(stem, subpath, suffix){
+  #return file name from stems where subpath
+  #is a dir in the data directory and suffix
+  #is the part after the stem.
+  dir <- paste0(subpath, paste0('/', stem))
+  return(paste0(get_data_dir(dir), suffix))
 }
 
-get_gatk_csv_file <- function(stem){
-  return(paste0(get_data_dir(stem),".recal.after.csv"))
+get_benchmark_file <- function(stem, subpath = '.'){
+  return(get_file(stem, subpath, ".benchmark"))
+}
+
+get_gatk_csv_file <- function(stem, subpath = '.'){
+  return(get_file(stem, subpath, ".recal.after.csv"))
 }
 
 p_to_q <- function(p){
@@ -18,7 +26,7 @@ p_to_q <- function(p){
 }
 
 #returns a df with covariatevalue and reportedquality columns
-average_over_rgs <- function(df){
+average_over_rgs_fnr <- function(df){
   df %>%
     filter(CovariateName == 'QualityScore' & Recalibration == 'After') %>%
     rename(PredictedQuality = CovariateValue) %>%
@@ -70,6 +78,36 @@ plot_comparison_dfs <- function(comparison_dfs){
     theme(plot.margin = margin(0,0,0,0))
 }
 
+import_fpr_csvs <- function(fpr){
+  csv_files <- get_gatk_csv_file(fpr, subpath = 'fpr')
+  dfs <- map(csv_files, read_csv)
+  names(dfs) <- fpr
+  df <- bind_rows(dfs, .id = 'FalsePositiveRate')
+  return(df)
+}
+
+average_over_rgs_fpr <- function(df){
+  df %>%
+    filter(CovariateName == 'QualityScore' & Recalibration == 'After') %>%
+    rename(PredictedQuality = CovariateValue) %>%
+    mutate_at(vars(FalsePositiveRate, PredictedQuality), as.numeric) %>%
+    group_by(FalsePositiveRate, PredictedQuality) %>%
+    summarize(ActualQuality = p_to_q(sum(Errors)/sum(Observations)))
+}
+
+plot_fpr_csvs <- function(gatk_df){
+  ggplot(gatk_df, aes(PredictedQuality, ActualQuality)) +
+    geom_abline(slope = 1, intercept = 0) +
+    geom_point(aes(color = factor(FalsePositiveRate)), size = 2) +
+    geom_line(aes(color = factor(FalsePositiveRate)), size = 1) +
+    scale_color_brewer('Known Sites\nFalse Positive\nRate', palette = 'PRGn') +
+    scale_x_continuous("Predicted Quality") +
+    scale_y_continuous("Actual Quality") +
+    ggtitle('False Positive Variants Have Little Effect') +
+    coord_fixed(ratio = 1) +
+    theme_minimal(base_size = 18) + 
+    theme(plot.margin = margin(0,0,0,0))
+}
 
 fnr <- c(0, 20, 40, 60, 80, 100)
 kbbq_benchmark_files <- get_benchmark_file(fnr)
@@ -103,8 +141,13 @@ pdf('../figures/comparison.pdf', width = 9, height = 7)
 plot_comparison_dfs(comparison_df)
 dev.off()
 
+fpr <- c(0,20,40,60,80,100)
+df <- average_over_rgs_fpr(import_fpr_csvs(fpr))
 
-
+pdf('../figures/fpr.pdf', width = 9, height = 7)
+plot_fpr_csvs(df)
+dev.off()
+    
 
 
 
