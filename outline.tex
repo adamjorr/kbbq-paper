@@ -29,6 +29,7 @@
 		\begin{outline}
 			\item Base quality scores are exactly defined as a probability. They can be interpreted as a prediction giving the probability the reported base is an error. In general, probabilities are called \textit{calibrated} if the reported probability accurately predicts the frequency of an event.
 			\item Base quality scores in Illumina sequencing reads are not well-calibrated \parencite{callahan_dada2:_2016}. (TODO: more cites)
+			\item Since base quality scores are used by variant calling methods, poorly calibrated reads have the potential to reduce the quality of resulting variant calls.
 		\end{outline}
 		\item How much does BQSR help?
 		\begin{outline}
@@ -44,6 +45,13 @@
 				\item Find some estimates of differences between reference and samples sequenced; perhaps look at mouse
 				\item This will be highly species-dependent and situation specific
 			\end{outline}
+		\item GATK BQSR occurs in two phases.
+			\begin{outline}
+				\item GATK BQSR is the most popular method for BQSR and is recommended by the GATK best practices.
+				\item Phase 1 - Count errors and covariates
+				\item Phase 2 - Train a hierarchical model.
+				\item Phase 3 - Apply model to adjust quality score.
+			\end{outline}
 		\item Alternative Approaches
 			\begin{outline}
 			\item Alternative approaches have been developed to avoid providing a database of variable sites. However, these approaches still require a reference and alignment.
@@ -56,6 +64,12 @@
 	\end{outline}
 	\item Methods \& Results
 	\begin{outline}
+		\item \texttt{kbbq} performs BQSR by adjusting how errors in the dataset are discovered.
+		\begin{outline}
+			\item Instead of looking at the reference, \texttt{kbbq} implements the error-correction algorithm described in \cite{song_lighter_2014} and uses the errors detected by that procedure to train and apply the standard GATK model.
+			\item Briefly, the algorithm subsamples k-mers from the dataset. Since erroneous k-mers are expected to be unique, erroneous k-mers are less likely to be sampled than error-free k-mers. A binomial test is then conducted for every nucleotide in the dataset; if a sufficient number of k-mers that contain the nucleotide, the base is likely not erroneous. If \textit{k} of these bases appear next to each other, that k-mer is stored as trusted. Once the trusted k-mers have all been stored, the dataset is iterated through one last time and any non-trusted k-mers are converted to the trusted k-mer that produces the maximal number of trusted k-mers in the read. These changes are marked as errors and used to train the model.
+			\item The model training and recalibration procedure are the same as those described above for GATK's BQSR method.
+		\end{outline}
 		\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
 		\begin{outline}
 			\item \includegraphics[width = 5in]{./figures/fpr.pdf}
@@ -70,8 +84,8 @@
 		% \end{figure}
 		\end{outline}	
 		\item Simulate both false positives and negatives and summarize degree of miscalibration.
-		\item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score
-		\item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios
+		% \item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score - this should be done for CH3
+		% \item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios - this should be done for CH3
 		\item kbbq description
 		\item application
 	\end{outline}
