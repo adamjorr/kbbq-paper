@@ -63,6 +63,8 @@
 		\item While base quality scores are important for identifying reliable data, base quality scores are often incorrect.
 		\item Base quality scores are exactly defined as a probability. They can be interpreted as a prediction giving the probability the reported base is an error. In general, probabilities are called \textit{calibrated} if the reported probability accurately predicts the frequency of an event.
 		\item Base quality scores in Illumina sequencing reads are not well-calibrated \parencite{callahan_dada2:_2016}. %(TODO: more cites)
+		\item A few alternative base calling models have been developed for Illumina machines that improve base call accuracy and quality score calibration; however, these are difficult to use because they require the raw output from the sequencing machine, which is unavailable to most users of sequencing as they are usually disposed of after a sequencing run due to the large cost associated with storing that data. %TODO: cite
+		%New para
 		\item Since base quality scores are used to some degree by most variant calling methods, it is probable that poorly calibrated reads reduce the quality of resulting variant calls.
 		\item Similarly, the reduced amount of information in binned quality scores may also impact the quality of variant calls made using the data.
 		\item Poor calibration combined with poor resolution resulting from quality score binning may have an important impact on algorithms that rely on these scores to function, but the exact affect of these phenomena are unknown.
@@ -85,9 +87,10 @@
 		\item In the first phase, the algorithm compares each read to the aligned reference. Potentially variable sites are ignored and mismatches from the reference sequence and non-mismatches are counted. The numbers of matching and mismatching bases are categorized according to the model covariates, which are: read group, assigned quality score, sequencing cycle, and the base identity along with the identity of the previous base (the base context).
 		% Phase 2 - Train a hierarchical model.
 		\item In the second phase, a bayesian hierarchical model is trained with the count data. Using a normal distribution of the mean probability of error as a prior, the \textit{maximum a posteriori} (MAP) quality score of the read group is calculated assuming the errors are binomially distributed. That is,
-		\begin{equation}
-		\hat{Q}_{rg} = argmax_{Q_{rg}} P(Q_{rg}|Errors_{rg}) = argmax_{Q_{rg}} P(\mathcal{B}(Errors_{rg} | Observations_{rg}, Q_{rg}) * P(\mathcal{N}(Q_{rg} | \bar{Q}))
-		\end{equation}
+		\begin{align}
+		\hat{Q}_{rg} &= argmax_{Q_{rg}} P(Q_{rg}|Errors_{rg}) \\
+		&= argmax_{Q_{rg}} P(\mathcal{B}(Errors_{rg} | Observations_{rg}, Q_{rg}) * P(\mathcal{N}(Q_{rg} | \bar{Q}))
+		\end{align}
 		\item This score is then used as the prior for calculating the \textit{maximum a posteriori} quality score for each assigned quality score in that read group, $\hat{Q}_{assigned\:quality\:score}$, using a simular formula.
 		\item In turn, this score is used as the prior for calculating the \textit{maximum a posteriori} scores for the sequencing cycle and context covariates of bases with that score. The difference between the MAP estimate and the prior is used to calculate the final score, which is the sum of the MAP estimate of the assigned quality score and these two differences. That is,
 		\begin{align}
@@ -136,14 +139,42 @@
 \end{outline}
 \section{Methods \& Results}
 \begin{outline}
-	\item Error correction algorithms
+	% \item Error correction algorithms
 	\item \texttt{kbbq} performs BQSR by adjusting how errors in the dataset are discovered.
 	\begin{outline}
 		\item Instead of looking at the reference, \texttt{kbbq} implements the error-correction algorithm described in \cite{song_lighter_2014} and uses the errors detected by that procedure to train and apply the standard GATK model. Note that the sequenced bases are not actually changed; the detected errors are used only to train the model. If there is evidence according to the model that the base is erroneous, its base quality will be decreased according to the strength of that evidence.
 		\item Briefly, the algorithm subsamples k-mers from the dataset. Since erroneous k-mers are expected to be unique, erroneous k-mers are less likely to be sampled than error-free k-mers. A binomial test is then conducted for every nucleotide in the dataset; if a sufficient number of k-mers contain the nucleotide, the base is likely not erroneous and called trusted. If \textit{k} of these trusted bases appear next to each other, that k-mer is stored as a trusted k-mer. Once the trusted k-mers have all been stored, each read is iterated through once again and any bases on the edge of an island of trusted k-mers are changed such that the change produces the maximal number of trusted k-mers in the read. These changes are marked as errors and used to train the model.
 		\item The model training and recalibration procedure are the same as those described above for GATK's BQSR method.
 	\end{outline}
+\end{outline}
+\subsection{Program Input and Parameters}
+\begin{outline}
+	\item \texttt{kbbq} requires as input a set of reads in FASTQ \parencite{cock_sanger_2010} or BAM \parencite{li_sequence_2009} format. If the input data is FASTQ formatted and consists of multiple read groups, the read group each read belongs to should be annotated in the name of each read. Alternatively, if the user has an original data file and a data file that has already been corrected using an error correction program, the user may supply the corrected file to \texttt{kbbq} to obtain errors from that correction rather than performing the error correction algorithm included in \texttt{kbbq}. The program's only required parameter is the approximate length of the genome the reads were sequenced from, and this information can be taken from the BAM header if it is present.
+
+	\item Optionally, the approximate sequencing depth may also be provided. If it is not, it will be estimated by finding the length of the sequenced data divided by the provided genome length; $Depth = \frac{Sequence\:Length}{Genome\:Length}$.
+	\item An $\alpha$ parameter may also be provided; this is the same $\alpha$ parameter that Lighter uses, and is the fraction of reads sampled from the input data \parencite{song_lighter_2014}. If not provided, the recommended value of $\alpha = \frac{7}{\operatorname{Depth}}$ is used.
+	\item A $k$ parameter may also be provided, which changes the k-mer size used for the error detection algorithm. The maximum value of 32 is recommended.
+	\item The genome length parameter, in addition to being used to estimate sequencing depth, is also used to estimate the number of k-mers that will be sampled. This is used to parameterize the bloom filter that stores the sampled and trusted k-mers. This parameterization is different than that used in Lighter; there, the number of sampled k-mers is estimated to be $1.5 \times \operatorname{Genome\:length}$. However, the expected number of sampled k-mers $K_{\operatorname{sampled}}$ is bounded by the expected value of the binomial distribution parameterized by $\operatorname{Genome\:length} \times \operatorname{Depth}$ and $\alpha$. Assuming \textit{every} k-mer is unique, the number of possible k-mers in the dataset $K_{\operatorname{total}}$ is at most $(\operatorname{Read\:length} - k + 1) \times \operatorname{Number\:of\:reads}$, since
+	\begin{align}
+	K_{total} &= (\operatorname{Read\:length} - k + 1) \times \operatorname{Number\:of\:reads} \\
+	&< \operatorname{Read\:length} \times \operatorname{Number\:of\:reads} \\
+	&< \operatorname{Read\:length} \times \frac{\operatorname{Depth} \times \operatorname{Genome\:length}}{\operatorname{Read\:length}} \\
+	&< \operatorname{Depth} \times \operatorname{Genome\:length}
+	\end{align}
+
+	\item So the expected number of sampled k-mers is
+
+	\begin{equation}
+	E[K_{\operatorname{sampled}}] = E[\mathcal{B}(x; \alpha, \operatorname{Depth} \times \operatorname{Genome\:length})] =
+		\alpha \times \operatorname{Depth} \times \operatorname{Genome\:length}
+	\end{equation}
+
+	\item Notably, if $\alpha$ is the recommended value of $\frac{7}{\operatorname{Depth}}$, the expected number of sampled k-mers is less than $7 \times \operatorname{Genome\:length}$, a bound greater than 4 times as large as the estimate used by Lighter. For the data analyzed here, this provides a much better estimate of the true number of sampled k-mers. Ultimately, the larger estimate of elements inserted into the bloom filter causes an increase in size of the bloom filter but a smaller false positive rate.
+	
 	\item Summarize program arguments and parameters. Give suggestions for each parameter. Summarize each parameter and default values in a table.
+\end{outline}
+\subsection{Testing and Validation}
+\begin{outline}
 	\item Describe test dataset used for benchmarking.
 	\begin{itemize}
 		\item CHM1 and CHM13 are human complete hydatidiform mole cell lines.
