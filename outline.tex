@@ -60,7 +60,7 @@
 \begin{outline}
 	\item What is Base Quality Score Recalibration?
 	\begin{outline}
-		\item While base quality scores are important for identifying reliable data, base quality scores are not often correct.
+		\item While base quality scores are important for identifying reliable data, base quality scores are often incorrect.
 		\item Base quality scores are exactly defined as a probability. They can be interpreted as a prediction giving the probability the reported base is an error. In general, probabilities are called \textit{calibrated} if the reported probability accurately predicts the frequency of an event.
 		\item Base quality scores in Illumina sequencing reads are not well-calibrated \parencite{callahan_dada2:_2016}. %(TODO: more cites)
 		\item Since base quality scores are used to some degree by most variant calling methods, it is probable that poorly calibrated reads reduce the quality of resulting variant calls.
@@ -104,7 +104,7 @@
 		\item However, \cite{ni_improvement_2016} find that improved quality score calibration aids detection of minor alleles in high coverage datasets by increasing sensitivity and reducing the number of false positive calls.
 		\item Thus, the need to perform BQSR and the performance of GATK's BQSR algorithm may vary from study to study.
 		\item One objective of this work is to help elucidate when GATK BQSR performs well and when it fails, and provide a method that works in situations that GATK BQSR struggles with.
-		\item As an example, the GATK developers recommend BQSR for use in cancer variant discovery \parencite{cibulskis_sensitive_2013}, but the tumor genome is likely much different from the human genome, and the database of variable sites will likely miss many truly variable sites due to the large mutation rate present in cancer genomes. Additionally, mismatches in reads misaligned due to chromosomal rearrangements may mistakenly be counted as evidence of sequencing error. The number of these errors required to significantly impact the performance of the algorithm is not clear.
+		\item As an example, the GATK developers recommend BQSR for use in cancer variant discovery \parencite{cibulskis_sensitive_2013}, but the tumor genome is likely much different from the human genome, and the database of variable sites will likely miss many truly variable sites due to the large mutation rate present in cancer genomes. Additionally, mismatches in reads misaligned due to chromosomal rearrangements may be mistakenly counted as evidence of sequencing error. The number of these errors required to significantly impact the performance of the algorithm is not clear.
 	\end{outline}
 \end{outline}
 
@@ -113,7 +113,7 @@
 \begin{outline}
 	\item What is the problem with current methods for BQSR?
 	\begin{outline}
-		\item As illustrated above, the most problematic aspect of GATK BQSR occurs in the first phase of the algorithm: counting erroneous and non-erroneous bases. This is especially true when considering non-model organisms, where alignment errors may be common. Furthermore, in non-model organisms a database of variable sites is likely unavailable or largely incomplete. However, there are methods that attempt to overcome this deficiency. While there exist alternative approaches that implement different error models, such as Lacer \parencite{chung_lacer:_2017}, the focus of this work is on alternative methods for counting erroneous and non-erroneous bases.
+		\item As illustrated above, the most problematic aspect of GATK BQSR occurs in the first phase of the algorithm: counting erroneous and non-erroneous bases. This is especially true when considering non-model organisms, where alignment errors may be common. Furthermore, in non-model organisms a database of variable sites is likely unavailable or largely incomplete. However, there are methods that attempt to overcome this deficiency. While there exist alternative approaches that implement different error models, such as Lacer \parencite{chung_lacer:_2017}, the biggest problem for analyzing data without reliable reference information is the method of counting erroneous and non-erroneous bases.
 
 
 		% \item In a variant calling context, BQSR is probably most helpful in regions with low coverage, as the limited amount of data makes it difficult to differentiate between errors, heterozygous sites, and mutations.
@@ -129,18 +129,18 @@
 		\item SOAP2 \parencite{li_soap2:_2009} contains a model for consensus sequence construction that performs BQSR during construction. %It doesn't seem possible to get these recalibrated scores out??
 		\item The methods of \cite{zook_synthetic_2012} and \cite{ni_improvement_2016} use synthetic spike-ins of known composition and GATK's model \cite{zook_synthetic_2012} or piecewise regression \parencite{ni_improvement_2016} to recalibrate quality scores. Since the sequence of the spike-in is known before hand, errors are easy to identify as there should be no biological variation in the spiked-in sample.
 		% \item While these approaches are useful alternatives to GATK, the comparisons presented here will only compare against GATK BQSR as none of the alternative approaches function without a reference and GATK BQSR is the most popular method.
-		\item Crucially, these methods require a reference and possibly other information to recalibrate reads.
+		\item Crucially, these methods require a reference and possibly other information to recalibrate reads that may not be available.
 
 		\end{outline}
-	\item Here we present \texttt{kbbq}, a method to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites.
+	\item Here we present \texttt{kbbq}, a software package to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites. The only required input is the set of reads to be recalibrated. Rather than excluding variation and comparing to the reference like GATK does, \texttt{kbbq} uses the k-mer spectrum of the reads to find likely errors. Once the number of errors and nonerrors are counted and categorized according to their covariates, it uses the same model GATK uses to recalibrate the reads.
 \end{outline}
 \section{Methods \& Results}
 \begin{outline}
 	\item Error correction algorithms
 	\item \texttt{kbbq} performs BQSR by adjusting how errors in the dataset are discovered.
 	\begin{outline}
-		\item Instead of looking at the reference, \texttt{kbbq} implements the error-correction algorithm described in \cite{song_lighter_2014} and uses the errors detected by that procedure to train and apply the standard GATK model.
-		\item Briefly, the algorithm subsamples k-mers from the dataset. Since erroneous k-mers are expected to be unique, erroneous k-mers are less likely to be sampled than error-free k-mers. A binomial test is then conducted for every nucleotide in the dataset; if a sufficient number of k-mers that contain the nucleotide, the base is likely not erroneous. If \textit{k} of these bases appear next to each other, that k-mer is stored as trusted. Once the trusted k-mers have all been stored, the dataset is iterated through one last time and any non-trusted k-mers are converted to the trusted k-mer that produces the maximal number of trusted k-mers in the read. These changes are marked as errors and used to train the model.
+		\item Instead of looking at the reference, \texttt{kbbq} implements the error-correction algorithm described in \cite{song_lighter_2014} and uses the errors detected by that procedure to train and apply the standard GATK model. Note that the sequenced bases are not actually changed; the detected errors are used only to train the model. If there is evidence according to the model that the base is erroneous, its base quality will be decreased according to the strength of that evidence.
+		\item Briefly, the algorithm subsamples k-mers from the dataset. Since erroneous k-mers are expected to be unique, erroneous k-mers are less likely to be sampled than error-free k-mers. A binomial test is then conducted for every nucleotide in the dataset; if a sufficient number of k-mers contain the nucleotide, the base is likely not erroneous and called trusted. If \textit{k} of these trusted bases appear next to each other, that k-mer is stored as a trusted k-mer. Once the trusted k-mers have all been stored, each read is iterated through once again and any bases on the edge of an island of trusted k-mers are changed such that the change produces the maximal number of trusted k-mers in the read. These changes are marked as errors and used to train the model.
 		\item The model training and recalibration procedure are the same as those described above for GATK's BQSR method.
 	\end{outline}
 	\item Summarize program arguments and parameters. Give suggestions for each parameter. Summarize each parameter and default values in a table.
@@ -149,7 +149,7 @@
 		\item CHM1 and CHM13 are human complete hydatidiform mole cell lines.
 		\item The moles are formed when a sperm combines with an egg containing no nucleus.
 		\item The sperm then undergoes mitosis to generate a completely homozygous cell mass.
-		\item DNA from CHM1 and CHM13 human hydatidiform mole cell lines was mixed to generate a synthetic diploid dataset for benchmarking (\cite{li_synthetic-diploid_2018}).
+		\item DNA from CHM1 and CHM13 human hydatidiform mole cell lines was mixed to generate a synthetic diploid dataset for benchmarking \parencite{li_synthetic-diploid_2018}.
 		\item We analyzed Illumina reads aligned on Chromosome 1 and compared recalibrated quality scores generated using our method and the standard GATK method.
 	\end{itemize}
 	\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
