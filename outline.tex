@@ -12,6 +12,7 @@
 \usepackage{wrapfig}
 \usepackage{lineno}
 \usepackage{outline}
+\usepackage{tabularx}
 \bibliography{citations.bib}
 \graphicspath{./figures/}
 
@@ -88,8 +89,8 @@
 		% Phase 2 - Train a hierarchical model.
 		\item In the second phase, a bayesian hierarchical model is trained with the count data. Using a normal distribution of the mean probability of error as a prior, the \textit{maximum a posteriori} (MAP) quality score of the read group is calculated assuming the errors are binomially distributed. That is,
 		\begin{align}
-		\hat{Q}_{rg} &= argmax_{Q_{rg}} P(Q_{rg}|Errors_{rg}) \\
-		&= argmax_{Q_{rg}} P(\mathcal{B}(Errors_{rg} | Observations_{rg}, Q_{rg}) * P(\mathcal{N}(Q_{rg} | \bar{Q}))
+		\hat{Q}_{rg} &= \operatorname{argmax}_{Q_{rg}} P(Q_{rg}|Errors_{rg}) \\
+		&= \operatorname{argmax}_{Q_{rg}} P(\mathcal{B}(Errors_{rg} | Observations_{rg}, Q_{rg}) * P(\mathcal{N}(Q_{rg} | \bar{Q}))
 		\end{align}
 		\item This score is then used as the prior for calculating the \textit{maximum a posteriori} quality score for each assigned quality score in that read group, $\hat{Q}_{assigned\:quality\:score}$, using a simular formula.
 		\item In turn, this score is used as the prior for calculating the \textit{maximum a posteriori} scores for the sequencing cycle and context covariates of bases with that score. The difference between the MAP estimate and the prior is used to calculate the final score, which is the sum of the MAP estimate of the assigned quality score and these two differences. That is,
@@ -135,9 +136,9 @@
 		\item Crucially, these methods require a reference and possibly other information to recalibrate reads that may not be available.
 
 		\end{outline}
-	\item Here we present \texttt{kbbq}, a software package to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites. The only required input is the set of reads to be recalibrated. Rather than excluding variation and comparing to the reference like GATK does, \texttt{kbbq} uses the k-mer spectrum of the reads to find likely errors. Once the number of errors and nonerrors are counted and categorized according to their covariates, it uses the same model GATK uses to recalibrate the reads.
+	\item Here we present \texttt{kbbq}, a software package to recalibrate quality scores of whole genome sequencing data without a reference or database of variable sites. The only required input is the set of reads to be recalibrated. Rather than excluding variation and comparing to the reference like GATK does, \texttt{kbbq} uses k-mer subsampling to find likely errors. Once the number of errors and nonerrors are counted and categorized according to their covariates, it uses the same model GATK uses to recalibrate the reads. I show how simulated false negatives and false positives affect GATK's ability to recalibrate reads and compare GATK calibration to \texttt{kbbq}.
 \end{outline}
-\section{Methods \& Results}
+\section{Materials and Methods}
 \begin{outline}
 	% \item Error correction algorithms
 	\item \texttt{kbbq} performs BQSR by adjusting how errors in the dataset are discovered.
@@ -149,40 +150,67 @@
 \end{outline}
 \subsection{Program Input and Parameters}
 \begin{outline}
-	\item \texttt{kbbq} requires as input a set of reads in FASTQ \parencite{cock_sanger_2010} or BAM \parencite{li_sequence_2009} format. If the input data is FASTQ formatted and consists of multiple read groups, the read group each read belongs to should be annotated in the name of each read. Alternatively, if the user has an original data file and a data file that has already been corrected using an error correction program, the user may supply the corrected file to \texttt{kbbq} to obtain errors from that correction rather than performing the error correction algorithm included in \texttt{kbbq}. The program's only required parameter is the approximate length of the genome the reads were sequenced from, and this information can be taken from the BAM header if it is present.
+	\item \texttt{kbbq} requires as input a set of reads in FASTQ \parencite{cock_sanger_2010} or BAM \parencite{li_sequence_2009} format. If the input data is FASTQ formatted and consists of multiple read groups, the read group each read belongs to should be annotated in the name of each read. Alternatively, if the user has an original data file and a data file that has already been corrected using an error correction program, the user may supply the corrected file with the \texttt{-\phantom{}-fixed} option to obtain errors from that correction rather than performing the error correction algorithm included in \texttt{kbbq}. The program's only required parameter is the approximate length of the sequenced region in base-pairs, and this information can be taken from the BAM header if it is present. It may be set with the \texttt{-\phantom{}-genomelen} option. If BAM input is provided, the \texttt{-\phantom{}-set-oq} and \texttt{-\phantom{}-use-oq} flags can be used to set the OQ flag on the read before recalibrating or to use the quality scores encoded in the OQ flag rather than the quality scores in the primary quality score field.
 
-	\item Optionally, the approximate sequencing depth may also be provided. If it is not, it will be estimated by finding the length of the sequenced data divided by the provided genome length; $Depth = \frac{Sequence\:Length}{Genome\:Length}$.
-	\item An $\alpha$ parameter may also be provided; this is the same $\alpha$ parameter that Lighter uses, and is the fraction of reads sampled from the input data \parencite{song_lighter_2014}. If not provided, the recommended value of $\alpha = \frac{7}{\operatorname{Depth}}$ is used.
-	\item A $k$ parameter may also be provided, which changes the k-mer size used for the error detection algorithm. The maximum value of 32 is recommended.
-	\item The genome length parameter, in addition to being used to estimate sequencing depth, is also used to estimate the number of k-mers that will be sampled. This is used to parameterize the bloom filter that stores the sampled and trusted k-mers. This parameterization is different than that used in Lighter; there, the number of sampled k-mers is estimated to be $1.5 \times \operatorname{Genome\:length}$. However, the expected number of sampled k-mers $K_{\operatorname{sampled}}$ is bounded by the expected value of the binomial distribution parameterized by $\operatorname{Genome\:length} \times \operatorname{Depth}$ and $\alpha$. Assuming \textit{every} k-mer is unique, the number of possible k-mers in the dataset $K_{\operatorname{total}}$ is at most $(\operatorname{Read\:length} - k + 1) \times \operatorname{Number\:of\:reads}$, since
+	\item Optionally, the approximate sequencing coverage may also be provided with the \texttt{-\phantom{}-coverage} option. If it is not, it will be estimated by finding the length of the sequenced data divided by the provided genome length; $\operatorname{Coverage} = \frac{\operatorname{Sequence\:Length}}{\operatorname{Genome\:Length}}$.
+	\item An $\alpha$ parameter may also be provided with the \texttt{-\phantom{}-alpha} option; this is the same $\alpha$ parameter that Lighter uses, and is the fraction of reads sampled from the input data \parencite{song_lighter_2014}. If not provided, the recommended value of $\alpha = \frac{7}{\operatorname{Coverage}}$ is used.
+	\item A $\texttt{-k}$ parameter may also be provided, which changes the k-mer size used for the error detection algorithm. The maximum value of 32 is recommended and is the default value.
+	\item A summary of flags and options the program supports is listed in table \ref{table:params}.
+	%new para
+	\item The genome length parameter, in addition to being used to estimate sequencing coverage, is also used to estimate the number of k-mers that will be sampled. This is used to parameterize the bloom filter that stores the sampled and trusted k-mers. This parameterization is different than that used in Lighter; there, the number of sampled k-mers is estimated to be $1.5 \times \operatorname{Genome\:length}$. However, the expected number of sampled k-mers $K_{\operatorname{sampled}}$ is bounded by the expected value of the binomial distribution parameterized by $\operatorname{Genome\:length} \times \operatorname{Coverage}$ and $\alpha$. Assuming \textit{every} k-mer is unique, the number of possible k-mers in the dataset $K_{\operatorname{total}}$ is less than $\operatorname{Coverage} \times \operatorname{Genome\:length}$. Since the number of k-mers in each read is $\operatorname{Read\:length} - k + 1$ and assuming equal read lengths, the total number of k-mers is:
 	\begin{align}
-	K_{total} &= (\operatorname{Read\:length} - k + 1) \times \operatorname{Number\:of\:reads} \\
+	K_{\operatorname{total}} &= \sum_{\operatorname{Reads}}{\operatorname{Read\:length} - k + 1} \\
+	&= (\operatorname{Read\:length} - k + 1) \times \operatorname{Number\:of\:reads} \\
 	&< \operatorname{Read\:length} \times \operatorname{Number\:of\:reads} \\
-	&< \operatorname{Read\:length} \times \frac{\operatorname{Depth} \times \operatorname{Genome\:length}}{\operatorname{Read\:length}} \\
-	&< \operatorname{Depth} \times \operatorname{Genome\:length}
+	&< \operatorname{Read\:length} \times \frac{\operatorname{Coverage} \times \operatorname{Genome\:length}}{\operatorname{Read\:length}} \\
+	&< \operatorname{Coverage} \times \operatorname{Genome\:length}
 	\end{align}
 
 	\item So the expected number of sampled k-mers is
 
-	\begin{equation}
-	E[K_{\operatorname{sampled}}] = E[\mathcal{B}(x; \alpha, \operatorname{Depth} \times \operatorname{Genome\:length})] =
-		\alpha \times \operatorname{Depth} \times \operatorname{Genome\:length}
-	\end{equation}
+	\begin{align}
+	E[K_{\operatorname{sampled}}] &= E[\mathcal{B}(x; \alpha, K_{\operatorname{total}})] \\
+	&= \alpha \times K_{\operatorname{total}} \\
+	&< \alpha \times \operatorname{Coverage} \times \operatorname{Genome\:length}
+	\end{align}
 
-	\item Notably, if $\alpha$ is the recommended value of $\frac{7}{\operatorname{Depth}}$, the expected number of sampled k-mers is less than $7 \times \operatorname{Genome\:length}$, a bound greater than 4 times as large as the estimate used by Lighter. For the data analyzed here, this provides a much better estimate of the true number of sampled k-mers. Ultimately, the larger estimate of elements inserted into the bloom filter causes an increase in size of the bloom filter but a smaller false positive rate.
-	
-	\item Summarize program arguments and parameters. Give suggestions for each parameter. Summarize each parameter and default values in a table.
+	\item Notably, if $\alpha$ is the recommended value of $\frac{7}{\operatorname{Coverage}}$, the expected number of sampled k-mers is less than $7 \times \operatorname{Genome\:length}$, a bound over 4 times larger than the estimate used by Lighter. For the data analyzed here, this provides a much better estimate of the true number of sampled k-mers. Ultimately, the larger estimate of elements inserted into the bloom filter causes an increase in size of the bloom filter but a smaller false positive rate.
+
 \end{outline}
+
+	\begin{table}
+	\begin{tabularx}{\textwidth}{| l | l | >{\hsize=.7\hsize\linewidth=\hsize}X | >{\hsize=1.3\hsize\linewidth=\hsize}X | }
+	\hline
+	\textbf{Parameter} & \textbf{Short Option} & \textbf{Default Value} & \textbf{Summary} \\
+	\hline
+	\texttt{-\phantom{}-ksize} & \texttt{-k} & 32 & Size of k-mer to use for correction\\
+	\texttt{-\phantom{}-use-oq} & \texttt{-u} & Off & Use BAM OQ values as quality scores\\
+	\texttt{-\phantom{}-set-oq} & \texttt{-s} & Off & Set BAM OQ values before recalibration\\
+	\texttt{-\phantom{}-genomelen} & \texttt{-g} & Estimated for BAM, \newline required for FASTQ & The approximate size of the sequenced region in base-pairs.\\
+	\texttt{-\phantom{}-coverage} & \texttt{-c} & Estimated from data & Approximate sequencing coverage\\
+	\texttt{-\phantom{}-fixed} & \texttt{-f} & Off & Treat changes to reads in the given file as errors and recalibrate. \\
+	\texttt{-\phantom{}-alpha} & \texttt{-a} & 7 / coverage & Rate to sample k-mers\\
+	\hline
+	\end{tabularx}
+	\caption{\texttt{kbbq} parameters, short options for each long parameter name, the default value of the parameter and a summary of how each parameter changes the behavior of the program.}
+	\label{table:params}
+	\end{table}
+
 \subsection{Testing and Validation}
 \begin{outline}
 	\item Describe test dataset used for benchmarking.
-	\begin{itemize}
-		\item CHM1 and CHM13 are human complete hydatidiform mole cell lines.
-		\item The moles are formed when a sperm combines with an egg containing no nucleus.
-		\item The sperm then undergoes mitosis to generate a completely homozygous cell mass.
-		\item DNA from CHM1 and CHM13 human hydatidiform mole cell lines was mixed to generate a synthetic diploid dataset for benchmarking \parencite{li_synthetic-diploid_2018}.
-		\item We analyzed Illumina reads aligned on Chromosome 1 and compared recalibrated quality scores generated using our method and the standard GATK method.
-	\end{itemize}
+	\begin{outline}
+		\item To test the performance of \texttt{kbbq}, I reanalyzed the synthetic diploid CHM1-CHM13 dataset from \cite{li_synthetic-diploid_2018}. Like other benchmarking datasets, this dataset includes a BED file describing confident regions in which the genotype of any site that differs from homozygous reference within those regions are included in a VCF file. For the purposes of this work, I assume these confident regions and associated VCF entries are correct and represent the true genotype of the sequenced sample.
+		\item This dataset was specifically designed to study the impact of deep sequencing on variant calling and has a coverage of approximately 45x. Thus, the affect of sequence specific errors and other non-random biases in sequencing should be pronounced in this data.
+		\item The dataset was constructed by adding equal concentrations of DNA of CHM1 and CHM13 human complete hydatidiform mole cell lines and sequencing the mixture. These moles are formed when a sperm combines with an egg containing no nucleus; the sperm then undergoes mitosis to generate a completely homozygous cell mass. They are effectively haploid, and it is significantly easier to genotype a haploid cell than a diploid one. Thus, the mixture simulates a diploid human cell but the genotype of each "haplotype" is known. This means there should be very few, if any, errors in the declared genotypes included with the data. This is what \cite{li_synthetic-diploid_2018} find when validating their data as well.
+		%new paragraph
+		\item To measure the performance of \texttt{kbbq} and compare to GATK's BaseRecalibrator and ApplyBQSR tools, I subset the full dataset to only reads aligned on Chromosome 1 and overlapping the BED of confident regions using the samtools view command \parencite{li_sequence_2009}. I then used the samtools fixmate and view commands to remove any singleton reads. I then ran \texttt{kbbq} on the dataset with the options \texttt{-\phantom{}-use-oq -g 214206308 -a .15}. I also ran GATK's BaseRecalibrator with the provided variant data as the known sites file and the \texttt{-\phantom{}-use-original-qualities} flag set. I then used the ApplyBQSR tool with the \texttt{-\phantom{}-use-original-qualities} flag to recalibrate the input file. I then compared the two recalibrated files by running the BaseRecalibrator tool again with the same options on both output datasets and using GATK's AnalyzeCovariates tool.
+		%new paragraph
+		\item In order to determine how misspecification of the database of variable sites affects the calibration of GATK's BQSR procedure, I simulated various levels of false negative and false positive variants. In this case, false negative variants in the database of variable sites causes a site that should be ignored to not be ignored, greatly increasing the number of bases that GATK classifies as sequencing errors. On the other hand, false positive variants remove a site from GATK classification, so the affect is likely to be small except for large false positive rates. To create each false negative dataset, an appropriate number of sites from the VCF were randomly sampled with BCFTools and the shuf program. To create each false positive dataset, all sites from the VCF were extracted in BED format with the BCFTools query command, then subtracted from the BED of confident regions with bedtools subtract \parencite{quinlan_bedtools_2010}. The appropriate number of sites were then sampled with the shuf program and appended to the sites from the VCF to generate the BED file of all sites to exclude. These files were then provided as input to GATK the GATK BaseRecalibrator and calibration was evaluated with GATK's AnalyzeCovariates.
+	\end{outline}
+\end{outline}
+\section{Results}
+\begin{outline}
 	\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
 	\begin{outline}
 		\item \includegraphics[width = 5in]{./figures/fpr.pdf}
@@ -222,8 +250,6 @@
 	\end{outline}
 	\item Future work: see how big the difference is in variant calls using binned quality scores, miscalibrated reads, and well calibrated reads.
 \end{outline}
-
-\section{References}
 
 \printbibliography
 
