@@ -184,8 +184,8 @@
 	\textbf{Parameter} & \textbf{Short Option} & \textbf{Default Value} & \textbf{Summary} \\
 	\hline
 	\texttt{-\phantom{}-ksize} & \texttt{-k} & 32 & Size of k-mer to use for correction\\
-	\texttt{-\phantom{}-use-oq} & \texttt{-u} & Off & Use BAM OQ values as quality scores\\
-	\texttt{-\phantom{}-set-oq} & \texttt{-s} & Off & Set BAM OQ values before recalibration\\
+	\texttt{-\phantom{}-use-oq} & \texttt{-u} & Off & Use BAM OQ tag values as quality scores\\
+	\texttt{-\phantom{}-set-oq} & \texttt{-s} & Off & Set BAM OQ tag values before recalibration\\
 	\texttt{-\phantom{}-genomelen} & \texttt{-g} & Estimated for BAM, \newline required for FASTQ & The approximate size of the sequenced region in base-pairs.\\
 	\texttt{-\phantom{}-coverage} & \texttt{-c} & Estimated from data & Approximate sequencing coverage\\
 	\texttt{-\phantom{}-fixed} & \texttt{-f} & Off & Treat changes to reads in the given file as errors and recalibrate. \\
@@ -228,12 +228,21 @@
 	% \item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score - this should be done for CH3
 	% \item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios - this should be done for CH3
 	\item Summarize FP / FN / and FP+FN results in a table
+	% - do this for CH3 
 	\item Application
 	\begin{outline}
-		\item Describe Eucalyptus data
-		\item Describe structure in data that enables estimating the false positive and false negative rate
-		\item Recalibrate reads with \texttt{kbbq} instead of GATK BQSR and see how variant FPR and FNR change.
+		\item Align reads to chimp genome
+		\item Call initial set like you would doing BQSR with no variable sites
+		\item Do BaseRecalibration with the alignment and called sites
+		\item Use the model to do ApplyBQSR on the aligned data
+		\item Compare calibration
 	\end{outline}
+	% \item Application
+	% \begin{outline}
+	% 	\item Describe Eucalyptus data
+	% 	\item Describe structure in data that enables estimating the false positive and false negative rate
+	% 	\item Recalibrate reads with \texttt{kbbq} instead of GATK BQSR and see how variant FPR and FNR change.
+	% \end{outline}
 \end{outline}
 \section{Discussion}
 \begin{outline}
