@@ -207,28 +207,70 @@
 		\item To measure the performance of \texttt{kbbq} and compare to GATK's BaseRecalibrator and ApplyBQSR tools, I subset the full dataset to only reads aligned on Chromosome 1 and overlapping the BED of confident regions using the samtools view command \parencite{li_sequence_2009}. I then used the samtools fixmate and view commands to remove any singleton reads. I then ran \texttt{kbbq} on the dataset with the options \texttt{-\phantom{}-use-oq -g 214206308 -a .15}. I also ran GATK's BaseRecalibrator with the provided variant data as the known sites file and the \texttt{-\phantom{}-use-original-qualities} flag set. I then used the ApplyBQSR tool with the \texttt{-\phantom{}-use-original-qualities} flag to recalibrate the input file. I then compared the two recalibrated files by running the BaseRecalibrator tool again with the same options on both output datasets and using GATK's AnalyzeCovariates tool.
 		%new paragraph
 		\item In order to determine how misspecification of the database of variable sites affects the calibration of GATK's BQSR procedure, I simulated various levels of false negative and false positive variants. In this case, false negative variants in the database of variable sites causes a site that should be ignored to not be ignored, greatly increasing the number of bases that GATK classifies as sequencing errors. On the other hand, false positive variants remove a site from GATK classification, so the affect is likely to be small except for large false positive rates. To create each false negative dataset, an appropriate number of sites from the VCF were randomly sampled with BCFTools and the shuf program. To create each false positive dataset, all sites from the VCF were extracted in BED format with the BCFTools query command, then subtracted from the BED of confident regions with bedtools subtract \parencite{quinlan_bedtools_2010}. The appropriate number of sites were then sampled with the shuf program and appended to the sites from the VCF to generate the BED file of all sites to exclude. These files were then provided as input to GATK the GATK BaseRecalibrator and calibration was evaluated with GATK's AnalyzeCovariates.
+		%new paragraph
+		\item GATK method test
+		\begin{outline}
+		\item To simulate a situation where a researcher has sequenced a non-model organism and is using a reference that may not closeley match the sample and doesn't have a database of variable sites, I aligned the test data to the chimp reference genome \parencite{waterson_initial_2005} usign NextGenMap \parencite{sedlazeck_nextgenmap_2013}. %todo: using aligner X, more info and a cite for this
+		\item In this situation, GATK recommends calling an initial set variants with high confidence and using these variants as the database of variable sites. %todo: give GATK parameters, etc used.
+		\item To see how this affects the results of GATK's BQSR, I did so using HaplotypeCaller with the \texttt{-stand-call-conf 50} argument and used the resulting variants with BaseRecalibrator to train a recalibration model. To evaluate this model using the truth set, I used the model to recalibrate the reads as they were aligned to the human reference. I then used AnalyzeCovariates as above to check the resulting calibration.
+		\end{outline}
 	\end{outline}
 \end{outline}
 \section{Results}
 \begin{outline}
-	\item Simulate false positives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
-	\begin{outline}
-		\item \includegraphics[width = 5in]{./figures/fpr.pdf}
-		\item Base quality score calibration for a range of false positives in the database of variable sites. The false negative rate is zero. Increasing the false positive rate does not significantly impact the quality of the calibration.
-	\end{outline}
-	\item Simulate false negatives in database of variable sites and summarize degree of miscalibration (brier score and RMSE)
-	% \begin{figure}[h]
-	\begin{outline}
-		\item \includegraphics[width=5in]{./figures/fnr.pdf}
-		\item Base quality score calibration for a range of false negatives in the database of variable sites. The false positive rate is zero. Increasing the false negative rate decreases the quality of the calibration.
-		% \caption{Base quality score calibration for a range of false negatives in the database of variable sites. The false positive rate is zero. Increasing the false negative rate decreases the quality of the calibration.}
-	% \end{figure}
-	\end{outline}	
+	\item To identify how errors in the database of variable sites affects calibration, I simulated different files with a set false positive rate, plotted the calibration and calculated the root mean squared error (RMSE) of the data recalibrated with the model trained using each database as the known sites input to GATK BaseRecalibrator. These plots are shown in figure \ref{figure:fpr}. As the false positive rate increases, the degree of miscalibration doesn't change significantly. 
+\end{outline}
+
+\begin{figure}
+	\includegraphics[width = .6\textwidth]{./figures/fpr.pdf}
+	\caption{Base quality score calibration for a range of false positives in the database of variable sites. The false negative rate for all datasets is zero. Increasing the false positive rate does not significantly impact the quality of the calibration.}
+	\label{figure:fpr}
+\end{figure}
+
+\begin{outline}
+	\item I also simulated different databases of variable sites with differing false negative rates and similarly used it to recalibrate my dataset. The plotted calibration and RMSE of the recalibrated data is shown in figure \ref{figure:fnr}. As the false negative rate increases, the degree of miscalibration also steadily increases.
+\end{outline}
+
+\begin{figure}
+	\includegraphics[width=.6\textwidth]{./figures/fnr.pdf}
+	\caption{Base quality score calibration for a range of false negatives in the database of variable sites. The false positive rate for all datasets is zero. Increasing the false negative rate significantly decreases the quality of the calibration, causing increasing  underconfidence in quality scores as the false negative rate rises.}
+	\label{figure:fnr}
+\end{figure}
+
+\begin{outline}
+	\item To see if there were any interactive effects of false positive rate and false negative rate, I also simulated datasets with varying false positive and false negative rates. The RMSE of the calibrated scores is reported \ref{table:fprfnr} in and summarized in figure \ref{figure:fprfnr} 
+	As before, the number of false negatives significantly impacted calibration quality while false positives had little effect. %TODO: check that this matches the actual data once it's done running
+\end{outline}
+
+\begin{figure}
+	%TODO: check that this is correct once I get the actual plot
+	%\includegraphics[width = .6\textwidth]{./figures/fprfnr.pdf}
+	\caption{Heat map of base quality calibration of varying ranges of false negatives and false positives. Databases of variable sites with differing false positive and false negative rates were constructed and the RMSE of the quality scores of the resulting calibration were calculated. Across the columns are each false positive rate, and each row represents a false negative rate.}
+	\label{figure:fprfnr}
+\end{figure}
+
+\begin{table}
+%TODO: this. check caption
+\begin{tabularx}{.5\textwidth}{| l l | X  X  X  X  X  X |}
+\hline
+& FPR& 0 & 20 & 40 & 60 & 80 & 100 \\
+FNR &&   &    &    &    &    & \\ %blank line
+\hline
+0   &&  &  &  &  &  & \\
+20  &&  &  &  &  &  & \\
+40  &&  &  &  &  &  & \\
+60  &&  &  &  &  &  & \\
+80  &&  &  &  &  &  & \\
+100 &&  &  &  &  &  & \\
+\hline
+\end{tabularx}
+\caption{Base quality calibration for data calibrated with databases of variable sites containing different levels of false positives and false negatives. The columns indicate false positive rates, the rows indicate false negative rates. The values in each cell are the RMSE of the quality scores for the reads recalibrated with the database of variable sites with false positive and false negative rate appropriate for its row and column.}
+\label{table:fprfnr}
+\end{table}
+
+\begin{outline}	
 	\item Simulate both false positives and negatives and summarize degree of miscalibration.
-	% \item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score - this should be done for CH3
-	% \item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios - this should be done for CH3
 	\item Summarize FP / FN / and FP+FN results in a table
-	% - do this for CH3 
 	\item Application
 	\begin{outline}
 		\item Align reads to chimp genome
@@ -237,6 +279,9 @@
 		\item Use the model to do ApplyBQSR on the aligned data
 		\item Compare calibration
 	\end{outline}
+	% - do this for CH3 
+	% \item Simulate downstream effect of FP and FN on variant quality; perhaps can do this with F-score - this should be done for CH3
+	% \item Perhaps look at depth vs. variant quality to see if BQSR helps more in low-coverage scenarios - this should be done for CH3
 	% \item Application
 	% \begin{outline}
 	% 	\item Describe Eucalyptus data
@@ -246,12 +291,18 @@
 \end{outline}
 \section{Discussion}
 \begin{outline}
-	\item GATK BQSR can cause miscalibration worse than using raw data in some situations
-	\item GATK BQSR is vulnerable to false negatives in the known sites input.
-	\begin{outline}
-		\item False negatives are likely to be numerous \parencite{bobo_false_2016} in nearly any case except with data generated from human samples.
-		\item GATK best practices recommends using only the most confident variants called from uncalibrated reads to use for recalibration in the case that a database of sites is not available.
-	\end{outline}
+	\item These results show that GATK BaseRecalibrator is particularly vulnerable to false negatives (figure \ref{figure:fnr}) in the database of variable sites, but is quite robust to false positives (figure \ref{figure:fpr}). Thus, when this database is unavailable and construction is required, it is best to be liberal in deciding which sites may be variable. However, this method still struggles on real data from non-model organisms. False negatives are likely to be numerous in almost all but the most well-studied samples \parencite{bobo_false_2016}. This means in most datasets, GATK BaseRecalibrator is not the best recalibration method. Despite this, its performance may be acceptable if the the false negative rate is sufficiently low.
+	
+	\item The results from the false positive simulations shown in figure \ref{figure:fpr} show GATK BaseRecalibrator is not significantly affected by the false positive rate. This is likely because most sites that contain errors are relatively evenly distributed site-wise, so randomly choosing some sites to remove removes proportionally equal amounts of errors and non-errors. This may be different than in an empirical dataset, where false positive errors are more likely to occur in sites that contain sequencing errors than in sites that do not. As an example, a greedy algorithm for variant calling will call every site containing a read that doesn't match the reference as variant; in this case, all sequencing errors in the dataset are false positives and using a database of variable sites constructed as such will have very little value for recalibrating quality scores. This is true even if the number of these sites is small in comparison to the number of total negative sites, leading to a low false positive rate. That is: in this simulation, $P(\operatorname{classified\:positive} | \operatorname{actual\:negative})$ is independent of $P(\operatorname{sequencing\:error})$, but on an empirical dataset $P(\operatorname{classified\:positive} | \operatorname{actual\:negative})$ is likely not. Thus if false positives are approximately randomly distributed, this finding holds; if false positives are more likely to occur in sites with sequencing errors, false positives may impact BaseRecalibrator more than these results indicate. %todo: make sure this makes sense to somebody that's not me
+
+	%This artifact may disappear in the new data; delete this paragraph if so.
+	\item The only rate that shows significant deviation from a 0\% false positive rate is the 100\% false positive rate. Though a 100\% false positive rate with a 0\% false negative rate implies every site should be considered variable and ignored, the model curiously still has a source of errors it uses to recalibrate. Upon further investigation, this artifact is driven by reads with alignments that begin with an insertion, as these inserted bases are not ignored by BaseRecalibrator when the first position of the site that should be ignored is equal to the first aligned position in the read. Thus, this line is a technical artifact. So long as there are enough bases available to collect data, the false positive rate doesn't significantly affect the performace of BaseRecalibrator.
+	%new para
+	\item Ultimately, if the false negative rate in the database of variable sites is high, GATK's procedure for BQSR may cause miscalibration of the data worse than using raw quality scores. %TODO: at what point does this happen? how high is high?
+	\item Naturally, this is an undesirable outcome and is best avoided if possible. Because of the potential for miscalibrating data, GATK BaseRecalibrator should not be used unless the sample is from a well-studied model organism.
+	%new para
+	\item In the event a database of variable sites is unavailable, GATK best practices recommends using only the most confident variants called from uncalibrated reads to use for recalibration. This recommendation conflicts with our findings; while high false negative rates cause miscalibrations, a high false positive rate will not so long as the false positives are not egregiously non-random. This should be true as long as the variant calling algorithm is not highly aggressive in classifying sites as variable. %TODO: update this paragraph with info from chimp alignment result
+	%new para
 	\item \texttt{kbbq} is resilient to misspecified references and missing databases of variable sites, since it doesn't use those as input.
 	\item Compare simulated scenarios to non-model and cancer scenarios?
 	\begin{outline}
