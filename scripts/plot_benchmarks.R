@@ -217,7 +217,7 @@ plot_fnrfpr_csvs <- function(gatk_df){
     ggtitle('Combined Affect On Calibration') +
     coord_fixed(ratio = 1) +
     theme_minimal(base_size = 18) + 
-    theme(plot.margin = margin(0,0,0,0))
+    theme(plot.margin = margin(0,0,0,0), axis.text = element_text(size = rel(.5)))
 }
 
 plot_fnrfpr_heatmap <- function(gatk_df){
@@ -260,7 +260,7 @@ plot_fpr_csvs(fpr_df)
 dev.off()
 
 fnrfpr_df <- average_over_rgs_fnrfpr(import_fnrfpr_csvs(fnr, fpr))
-pdf('../figures/fnrfpr.pdf', width = 9, height = 7)
+pdf('../figures/fnrfpr.pdf', width = 7, height = 7)
 plot_fnrfpr_csvs(fnrfpr_df)
 dev.off()
 
